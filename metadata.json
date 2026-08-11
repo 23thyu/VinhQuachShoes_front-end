@@ -1,0 +1,6 @@
+{
+  "name": "Jordan E-Commerce Store",
+  "description": "A premium, minimalist Nike Jordan e-commerce platform featuring immersive 3D-tilt product cards, search, checkout, user accounts, and a full administrator dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
