@@ -13,10 +13,14 @@ export const FloatingSocial: React.FC = () => {
         href="https://www.facebook.com/vinh.quach.3958"
         target="_blank"
         rel="noopener noreferrer"
-        className="w-10 h-10 md:w-12 md:h-12 bg-black border border-zinc-800 text-white flex items-center justify-center text-xs md:text-sm font-bold uppercase tracking-widest rounded-none hover:bg-white hover:text-black hover:border-white transition-colors duration-200 shadow-2xl cursor-pointer"
+        className="w-10 h-10 md:w-12 md:h-12 bg-black border border-zinc-800 text-white flex items-center justify-center rounded-none hover:bg-white hover:border-white transition-colors duration-200 shadow-2xl cursor-pointer p-2.5 group"
         title="FACEBOOK"
       >
-        FB
+        <img
+          src="/logoFB.webp"
+          alt="FB"
+          className="w-full h-full object-contain filter invert group-hover:invert-0 transition-all duration-200"
+        />
       </a>
 
       {/* Instagram Link */}
@@ -24,10 +28,14 @@ export const FloatingSocial: React.FC = () => {
         href="https://www.instagram.com/kelvinnn_212/"
         target="_blank"
         rel="noopener noreferrer"
-        className="w-10 h-10 md:w-12 md:h-12 bg-black border border-zinc-800 text-white flex items-center justify-center text-xs md:text-sm font-bold uppercase tracking-widest rounded-none hover:bg-white hover:text-black hover:border-white transition-colors duration-200 shadow-2xl cursor-pointer"
+        className="w-10 h-10 md:w-12 md:h-12 bg-black border border-zinc-800 text-white flex items-center justify-center rounded-none hover:bg-white hover:border-white transition-colors duration-200 shadow-2xl cursor-pointer p-2.5 group"
         title="INSTAGRAM"
       >
-        IG
+        <img
+          src="/logoIG.webp"
+          alt="IG"
+          className="w-full h-full object-contain filter invert group-hover:invert-0 transition-all duration-200"
+        />
       </a>
     </div>
   );
