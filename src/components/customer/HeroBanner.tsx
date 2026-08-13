@@ -153,7 +153,7 @@ export const HeroBanner: React.FC = () => {
       id="hero-scroll-track"
     >
       {/* Sticky Frame Container */}
-      <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
+      <div className="sticky top-0 min-h-[100dvh] h-[100dvh] w-full flex flex-col justify-between py-8 md:py-0 md:justify-center items-center overflow-hidden">
         
         {/* Brutalist Parallax Typographic Background */}
         <motion.div
@@ -163,7 +163,7 @@ export const HeroBanner: React.FC = () => {
           <h1 className="font-display text-[15vw] font-black leading-none tracking-tighter text-zinc-900 text-center uppercase">
             FLIGHT
           </h1>
-          <div className="flex w-full max-w-7xl justify-between px-10 text-[10px] font-mono tracking-[0.3em] text-zinc-800">
+          <div className="hidden md:flex w-full max-w-7xl justify-between px-10 text-[10px] font-mono tracking-[0.3em] text-zinc-800">
             <span>KHỞI NGUỒN: 1985</span>
             <span>CHROME / THÉP / GRAIN</span>
             <span>BEAVERTON, OR</span>
@@ -171,7 +171,7 @@ export const HeroBanner: React.FC = () => {
         </motion.div>
 
         {/* Layout Grid */}
-        <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-8 md:grid-cols-2 z-10 px-4 sm:px-6 lg:px-8">
+        <div className="relative mx-auto flex flex-col justify-center items-center gap-4 md:grid md:grid-cols-2 md:gap-8 z-10 px-4 sm:px-6 lg:px-8 w-full max-w-7xl mt-12 md:mt-0">
           
           {/* Left Details */}
           <motion.div
@@ -179,53 +179,53 @@ export const HeroBanner: React.FC = () => {
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="flex flex-col items-start text-white space-y-4 max-w-lg"
+            className="flex flex-col items-center text-center md:items-start md:text-left text-white space-y-2 md:space-y-4 max-w-sm md:max-w-lg px-2 md:px-0"
           >
-            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-550">
+            <div className="flex items-center gap-2 font-mono text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-zinc-550">
               <span className="h-1.5 w-1.5 bg-white rounded-none" />
               JORDAN RETRO ARCHIVE
             </div>
 
-            <h2 className="font-display text-4xl sm:text-6xl font-extrabold tracking-tight uppercase leading-none">
+            <h2 className="font-display text-2xl sm:text-4xl md:text-6xl font-extrabold tracking-tight uppercase leading-none">
               AIR JORDAN 1 <br />
               <span className="text-zinc-400 font-light font-sans tracking-wide">CHICAGO</span>
             </h2>
 
-            <p className="font-sans text-sm text-zinc-400 leading-relaxed font-light">
+            <p className="font-sans text-xs md:text-sm text-zinc-400 leading-relaxed font-light max-w-xs md:max-w-none">
               Phối màu Chicago kinh điển gắn liền với tên tuổi Michael Jordan năm 1984. Chất liệu da Tumbled nguyên bản, form dáng OG 1985 sắc nét.
             </p>
 
-            <div className="flex items-center gap-4 pt-4">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2 md:pt-4">
               <button
                 onClick={handleQuickAdd}
-                className="flex items-center gap-2 border border-white bg-white text-black px-6 py-3 font-mono text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white hover:border-zinc-700 transition-all rounded-none cursor-pointer group"
+                className="flex items-center gap-2 border border-white bg-white text-black px-4 py-2 md:px-6 md:py-3 font-mono text-[10px] md:text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white hover:border-zinc-700 transition-all rounded-none cursor-pointer group"
                 id="hero-buy-btn"
               >
                 MUA NGAY 'CHICAGO'
-                <ArrowRight className="h-4.5 w-4.5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="h-4 w-4 md:h-4.5 md:w-4.5 group-hover:translate-x-1 transition-transform" />
               </button>
-              <span className="font-mono text-xl font-medium tracking-wider text-zinc-300">
+              <span className="font-mono text-base md:text-xl font-medium tracking-wider text-zinc-300">
                 {(190 * 25000).toLocaleString('vi-VN')} ₫
               </span>
             </div>
           </motion.div>
 
           {/* Right Presentation: Canvas for scroll-linked sequence */}
-          <div className="relative flex items-center justify-center h-[350px] md:h-[500px]">
+          <div className="relative flex flex-col items-center justify-center w-full h-[32vh] md:h-[500px] max-h-[240px] md:max-h-none">
             {/* Ambient background soft glow */}
-            <div className="absolute top-1/2 left-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 bg-zinc-900/30 rounded-full blur-[100px] z-0" />
+            <div className="absolute top-1/2 left-1/2 h-[150px] w-[150px] md:h-[300px] md:w-[300px] -translate-x-1/2 -translate-y-1/2 bg-zinc-900/30 rounded-full blur-[60px] md:blur-[100px] z-0" />
 
             <canvas
               ref={canvasRef}
-              className="z-10 w-full h-full max-h-[320px] md:max-h-[460px] object-contain drop-shadow-[0_25px_35px_rgba(0,0,0,0.85)] cursor-ns-resize"
+              className="z-10 w-full h-full object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.85)] cursor-ns-resize"
               id="hero-sequence-canvas"
             />
 
             {/* Micro details overlay */}
-            <div className="absolute right-0 bottom-4 font-mono text-[9px] text-zinc-550 uppercase tracking-widest leading-relaxed text-right select-none z-10">
-                <span>MẪU: AJ1-XOAY-360</span><br />
-                <span>CẢM BIẾN XOAY TƯƠNG TÁC</span>
-              </div>
+            <div className="relative md:absolute md:right-0 md:bottom-4 mt-2 md:mt-0 font-mono text-[8px] md:text-[9px] text-zinc-550 uppercase tracking-widest leading-relaxed text-center md:text-right select-none z-10">
+              <span>MẪU: AJ1-XOAY-360</span><br />
+              <span>CẢM BIẾN XOAY TƯƠNG TÁC</span>
+            </div>
           </div>
 
         </div>
@@ -233,7 +233,7 @@ export const HeroBanner: React.FC = () => {
         {/* Scroll Helper */}
         <motion.div
           style={{ opacity: textOpacity }}
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-10 opacity-70"
+          className="relative md:absolute md:bottom-6 md:left-1/2 md:-translate-x-1/2 mt-auto md:mt-0 flex flex-col items-center gap-1 z-10 opacity-70"
         >
           <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-zinc-650">CUỘN XUỐNG ĐỂ XOAY</span>
           <motion.div

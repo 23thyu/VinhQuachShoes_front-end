@@ -28,6 +28,7 @@ export const Navbar: React.FC = () => {
   const { toast } = useToast();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   // Helper: push '/' to history and dispatch popstate so App.tsx clears selectedProductId
@@ -60,7 +61,7 @@ export const Navbar: React.FC = () => {
 
           {/* Desktop Categories */}
           {activeView === 'client' && activeClientTab === 'shop' && (
-            <nav className="hidden md:flex items-center gap-6 text-[10px] uppercase tracking-widest font-mono text-zinc-500">
+            <nav className="hidden lg:flex items-center gap-6 text-[10px] uppercase tracking-widest font-mono text-zinc-500">
               {/* First item: ALL */}
               <button
                 onClick={() => {
@@ -116,7 +117,7 @@ export const Navbar: React.FC = () => {
 
           {/* Search bar inside navigation (Client View - Shop tab) */}
           {activeView === 'client' && activeClientTab === 'shop' && (
-            <div className="relative hidden sm:block w-48 md:w-64">
+            <div className="relative hidden lg:block w-48 md:w-64">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-zinc-550">
                 <Search className="h-4 w-4" />
               </span>
@@ -294,8 +295,103 @@ export const Navbar: React.FC = () => {
             </AnimatePresence>
           </div>
 
+          {/* Mobile Menu Hamburger Trigger */}
+          {activeView === 'client' && activeClientTab === 'shop' && (
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="block lg:hidden px-3 py-1.5 border border-zinc-800 hover:border-white font-mono text-xs uppercase tracking-widest text-white transition-colors cursor-pointer rounded-none"
+              id="mobile-menu-trigger"
+            >
+              [ = ] MENU
+            </button>
+          )}
+
         </div>
       </div>
+
+      {/* Mobile Drawer (Full-Screen Menu) */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'tween', duration: 0.3, ease: 'easeOut' }}
+            className="bg-black h-screen w-full fixed inset-0 z-50 flex flex-col p-8 justify-between overflow-y-auto"
+          >
+            {/* Header section in Drawer */}
+            <div className="flex justify-between items-center w-full border-b border-zinc-800 pb-4 mb-6">
+              <span className="font-display text-sm font-black tracking-[0.2em] text-white">VINH QUACH</span>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-3 py-1.5 border border-zinc-800 hover:border-white font-mono text-xs uppercase tracking-widest text-white transition-colors cursor-pointer rounded-none"
+              >
+                [ X ] CLOSE
+              </button>
+            </div>
+
+            {/* Content section in Drawer */}
+            <div className="flex flex-col gap-6 text-left my-auto">
+              {/* Mobile Search bar */}
+              <div className="relative w-full mb-4">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-zinc-550">
+                  <Search className="h-4 w-4" />
+                </span>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="TÌM KIẾM..."
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-none py-3 pl-9 pr-3 text-sm tracking-wider text-white placeholder-zinc-550 focus:outline-none focus:border-zinc-450 focus:ring-0 transition-colors uppercase font-mono"
+                  onFocus={() => navigateHome()}
+                />
+              </div>
+
+              {/* Mobile Categories Links */}
+              <nav className="flex flex-col gap-5 text-left">
+                <button
+                  onClick={() => {
+                    navigateHome();
+                    setSelectedCategory('All');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`font-display text-3xl font-black tracking-widest text-left hover:text-white transition-colors uppercase ${
+                    selectedCategory === 'All' ? 'text-white border-l-2 border-white pl-4' : 'text-zinc-500'
+                  }`}
+                >
+                  ALL
+                </button>
+                {categories.map((cat) => {
+                  const catIdStr = String(cat.id);
+                  const isActive = selectedCategory === catIdStr;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => {
+                        navigateHome();
+                        setSelectedCategory(catIdStr);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={`font-display text-3xl font-black tracking-widest text-left hover:text-white transition-colors uppercase ${
+                        isActive ? 'text-white border-l-2 border-white pl-4' : 'text-zinc-500'
+                      }`}
+                    >
+                      {cat.name}
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
+
+            {/* Footer section in Drawer */}
+            <div className="border-t border-zinc-900 pt-6 mt-auto">
+              <p className="font-mono text-[9px] text-zinc-600 uppercase tracking-widest">
+                © 2026 VINH QUACH AUTHENTIC // EST. 2022
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };
