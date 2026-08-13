@@ -19,7 +19,7 @@ export const FloatingSocial: React.FC = () => {
         <img
           src="/logoFB.webp"
           alt="FB"
-          className="w-full h-full object-contain filter invert group-hover:invert-0 transition-all duration-200"
+          className="w-full h-full object-contain transition-all duration-200"
         />
       </a>
 
@@ -34,7 +34,7 @@ export const FloatingSocial: React.FC = () => {
         <img
           src="/logoIG.webp"
           alt="IG"
-          className="w-full h-full object-contain filter invert group-hover:invert-0 transition-all duration-200"
+          className="w-full h-full object-contain transition-all duration-200"
         />
       </a>
     </div>
