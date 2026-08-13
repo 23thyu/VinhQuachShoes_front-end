@@ -302,7 +302,7 @@ export const Navbar: React.FC = () => {
               className="block lg:hidden px-3 py-1.5 border border-zinc-800 hover:border-white font-mono text-xs uppercase tracking-widest text-white transition-colors cursor-pointer rounded-none"
               id="mobile-menu-trigger"
             >
-              [ = ] MENU
+              MENU
             </button>
           )}
 
@@ -326,7 +326,7 @@ export const Navbar: React.FC = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="px-3 py-1.5 border border-zinc-800 hover:border-white font-mono text-xs uppercase tracking-widest text-white transition-colors cursor-pointer rounded-none"
               >
-                [ X ] CLOSE
+                CLOSE
               </button>
             </div>
 
