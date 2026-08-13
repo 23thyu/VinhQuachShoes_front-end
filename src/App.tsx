@@ -16,6 +16,7 @@ import { CheckoutModal } from './components/customer/CheckoutModal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { CustomerAccount } from './components/customer/CustomerAccount';
 import { ArticleDetail } from './components/customer/ArticleDetail';
+import { FloatingSocial } from './components/customer/FloatingSocial';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, RotateCcw, Box, ShieldAlert } from 'lucide-react';
 
@@ -307,6 +308,9 @@ function AppContent() {
           </p>
         </div>
       </footer>
+
+      {/* Floating Social Media Bar */}
+      <FloatingSocial />
 
       {/* Portal Elements (Cart, Details, Checkouts) */}
       <AnimatePresence>
