@@ -8,6 +8,7 @@ import { motion } from 'motion/react';
 import { X, Loader2, Plus } from 'lucide-react';
 import { CloudinaryImagePicker } from './CloudinaryImagePicker';
 import { useToast } from '../../context/ToastContext';
+import { getAdminHeaders } from '../../utils/authHeaders';
 
 interface ProductImage {
   id: number;
@@ -59,9 +60,7 @@ export const ProductImageModal: React.FC<ProductImageModalProps> = ({ isOpen, on
     try {
       const response = await fetch(`${API_BASE_URL}/product-images`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAdminHeaders(),
         body: JSON.stringify({
           product_id: Number(productId),
           image_url: url,
@@ -85,6 +84,7 @@ export const ProductImageModal: React.FC<ProductImageModalProps> = ({ isOpen, on
     try {
       const response = await fetch(`${API_BASE_URL}/product-images/${id}`, {
         method: 'DELETE',
+        headers: getAdminHeaders()
       });
 
       if (response.ok) {

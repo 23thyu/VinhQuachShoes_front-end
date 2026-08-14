@@ -9,6 +9,7 @@ import { Settings, RefreshCw, Trash2, Plus, Check, Save, Image as ImageIcon, Loa
 import { CloudinaryImagePicker } from './CloudinaryImagePicker';
 import { Product, BackendVariant } from '../../types';
 import { useToast } from '../../context/ToastContext';
+import { getAdminHeaders } from '../../utils/authHeaders';
 
 interface AttributeRow {
   name: string;
@@ -180,7 +181,7 @@ export const VariantManagement: React.FC = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/products/${selectedProductId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders(),
         body: JSON.stringify({ attributes: attrsJson })
       });
       if (response.ok) {
@@ -263,6 +264,7 @@ export const VariantManagement: React.FC = () => {
       try {
         const response = await fetch(`${API_BASE_URL}/product-variants/${variant.id}`, {
           method: 'DELETE',
+          headers: getAdminHeaders()
         });
 
         if (response.ok) {
@@ -316,7 +318,7 @@ export const VariantManagement: React.FC = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/products/${selectedProductId}/variants/bulk`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders(),
         body: JSON.stringify({ variants: mappedVariants })
       });
 

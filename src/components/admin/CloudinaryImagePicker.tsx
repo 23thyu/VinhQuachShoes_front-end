@@ -7,6 +7,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UploadCloud, Image as ImageIcon, X, Trash2, Loader2, Check, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { getAdminAuthOnlyHeaders, getAdminHeaders } from '../../utils/authHeaders';
 
 interface MediaItem {
   id: number;
@@ -98,6 +99,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
     try {
       const response = await fetch(`${API_BASE_URL}/media/upload`, {
         method: 'POST',
+        headers: getAdminAuthOnlyHeaders(),
         body: formData
       });
 
@@ -150,7 +152,8 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
 
     try {
       const response = await fetch(`${API_BASE_URL}/media/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAdminHeaders()
       });
 
       if (response.ok) {

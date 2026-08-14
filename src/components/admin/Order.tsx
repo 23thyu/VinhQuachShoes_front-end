@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Eye, Trash2, X, ClipboardList, Clock, Truck, CheckCircle, ShieldX, Phone, Mail, User, MapPin, Loader2 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { getAdminHeaders } from '../../utils/authHeaders';
 
 interface OrderItemBackend {
   id: number;
@@ -64,7 +65,9 @@ export const OrderManagement: React.FC = () => {
   const fetchOrders = async (page = 1, status = '') => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/orders?page=${page}&status=${status}`);
+      const response = await fetch(`${API_BASE_URL}/orders?page=${page}&status=${status}`, {
+        headers: getAdminHeaders()
+      });
       if (response.ok) {
         const result = await response.json();
         setOrders(result.data || []);
@@ -85,7 +88,9 @@ export const OrderManagement: React.FC = () => {
   const handleShowDetails = async (id: number) => {
     setLoadingDetail(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/orders/${id}`);
+      const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+        headers: getAdminHeaders()
+      });
       if (response.ok) {
         const result = await response.json();
         setSelectedOrder(result.data);
@@ -146,7 +151,7 @@ export const OrderManagement: React.FC = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders(),
         body: JSON.stringify({ status: newStatus })
       });
 
@@ -171,7 +176,8 @@ export const OrderManagement: React.FC = () => {
     if (!confirmed) return;
     try {
       const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAdminHeaders()
       });
       if (response.ok) {
         setOrders(prev => prev.filter(o => o.id !== id));

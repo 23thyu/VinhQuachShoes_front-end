@@ -152,6 +152,12 @@ export const Navbar: React.FC = () => {
               <button
                 onClick={() => {
                   navigateHome();
+                  if (!currentUser || currentUser.role !== 'Admin') {
+                    setActiveView('client');
+                    setActiveClientTab('account');
+                    toast.warning('VUI LÒNG ĐĂNG NHẬP BẰNG TÀI KHOẢN ADMIN');
+                    return;
+                  }
                   setActiveView('admin');
                 }}
                 className={`px-2.5 py-1 text-center font-medium uppercase transition-colors rounded-none flex items-center gap-1 ${activeView === 'admin'

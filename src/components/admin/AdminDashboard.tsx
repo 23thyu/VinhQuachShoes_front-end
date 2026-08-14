@@ -22,6 +22,8 @@ import { MediaLibrary } from './Media';
 import { BannerManagement } from './Banner';
 import { NewsManagement } from './News';
 
+import { getAdminHeaders } from '../../utils/authHeaders';
+
 export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'variants' | 'categories' | 'brands' | 'orders' | 'users' | 'media' | 'banners' | 'news'>('overview');
 
@@ -37,7 +39,9 @@ export const AdminDashboard: React.FC = () => {
     try {
       const [prodRes, orderRes] = await Promise.all([
         fetch(`${API_BASE_URL}/products?limit=all`),
-        fetch(`${API_BASE_URL}/orders?limit=all`)
+        fetch(`${API_BASE_URL}/orders?limit=all`, {
+          headers: getAdminHeaders()
+        })
       ]);
       if (prodRes.ok) {
         const result = await prodRes.json();

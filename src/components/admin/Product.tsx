@@ -10,6 +10,7 @@ import { CloudinaryImagePicker } from './CloudinaryImagePicker';
 import { ProductImageModal } from './ProductImageModal';
 import { Product, Brand, Category } from '../../types';
 import { useToast } from '../../context/ToastContext';
+import { getAdminHeaders } from '../../utils/authHeaders';
 
 const API_BASE_URL = ((import.meta as any).env?.VITE_API_BASE_URL as string) || 'http://localhost:3009/api';
 
@@ -167,14 +168,14 @@ export const ProductManagement: React.FC = () => {
         // Edit product
         response = await fetch(`${API_BASE_URL}/products/${editingProduct.id}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminHeaders(),
           body: JSON.stringify(bodyData)
         });
       } else {
         // Create product
         response = await fetch(`${API_BASE_URL}/products`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminHeaders(),
           body: JSON.stringify(bodyData)
         });
       }
@@ -196,7 +197,8 @@ export const ProductManagement: React.FC = () => {
     if (!confirmed) return;
     try {
       const response = await fetch(`${API_BASE_URL}/products/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAdminHeaders()
       });
       if (response.ok) {
         toast.success('ĐÃ XÓA SẢN PHẨM THÀNH CÔNG');

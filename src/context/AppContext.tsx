@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Product, Category, Variant, User, Order, OrderItem, CartItem, HydratedCartItem, HydratedOrder, HydratedOrderItem } from '../types';
 import { toastApi } from './ToastContext';
+import { getAuthToken } from '../utils/authHeaders';
 
 interface AppContextType {
   products: Product[];
@@ -250,7 +251,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const fetchUserOrders = async () => {
     if (!currentUser) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/orders`);
+      const token = getAuthToken();
+      const authHeader = token ? { 'Authorization': `Bearer ${token}` } : {};
+      const res = await fetch(`${API_BASE_URL}/orders`, { headers: authHeader });
       if (res.ok) {
         const result = await res.json();
         const ordersList = result.data || [];
@@ -261,7 +264,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
         await Promise.all(
           ordersList.map(async (order: any) => {
-            const detailRes = await fetch(`${API_BASE_URL}/orders/${order.id}`);
+            const token = getAuthToken();
+            const authHeader = token ? { 'Authorization': `Bearer ${token}` } : {};
+            const detailRes = await fetch(`${API_BASE_URL}/orders/${order.id}`, { headers: authHeader });
             if (detailRes.ok) {
               const detailResult = await detailRes.json();
               const fullOrder = detailResult.data;

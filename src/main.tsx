@@ -10,11 +10,12 @@ const originalFetch = window.fetch;
 window.fetch = async (input, init) => {
   const token = localStorage.getItem('jordan_token') || sessionStorage.getItem('jordan_token');
   
-  // Do not append local auth headers to external third-party APIs (e.g., provinces.open-api.vn)
   const url = typeof input === 'string' ? input : (input && typeof input === 'object' && 'url' in input ? (input as any).url : '');
-  const isExternal = url.startsWith('http') && !url.includes('localhost') && !url.includes('127.0.0.1') && !url.includes('3009');
+  
+  // Do not append local auth headers to external third-party APIs (e.g., open-api.vn, cloudinary)
+  const isKnownThirdParty = url.includes('open-api.vn') || url.includes('api.cloudinary.com');
 
-  if (token && !isExternal) {
+  if (token && !isKnownThirdParty) {
     init = init || {};
     const headers = init.headers || {};
 

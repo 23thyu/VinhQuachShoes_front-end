@@ -58,12 +58,9 @@ export const Login: React.FC<LoginProps> = ({ onToggleView }) => {
       if (response.ok) {
         const { token, user } = result.data;
         
-        // Save token securely
-        if (rememberMe) {
-          localStorage.setItem('jordan_token', token);
-        } else {
-          sessionStorage.setItem('jordan_token', token);
-        }
+        // Save token securely in both localStorage and sessionStorage
+        localStorage.setItem('jordan_token', token);
+        sessionStorage.setItem('jordan_token', token);
         
         // Set currentUser in global context
         // Ensure user object maps to User type

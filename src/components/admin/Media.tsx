@@ -7,6 +7,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Image as ImageIcon, UploadCloud, Trash2, X, Search, Loader2, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { getAdminHeaders, getAdminAuthOnlyHeaders } from '../../utils/authHeaders';
 
 interface MediaItem {
   id: number;
@@ -62,7 +63,8 @@ export const MediaLibrary: React.FC = () => {
     if (!confirmed) return;
     try {
       const response = await fetch(`${API_BASE_URL}/media/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAdminHeaders()
       });
       if (response.ok) {
         setMediaItems(prev => prev.filter(item => item.id !== id));
@@ -95,6 +97,7 @@ export const MediaLibrary: React.FC = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/media/upload`, {
         method: 'POST',
+        headers: getAdminAuthOnlyHeaders(),
         body: formData
       });
 

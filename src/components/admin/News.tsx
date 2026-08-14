@@ -9,6 +9,7 @@ import { Plus, Trash2, Edit3, X, Image as ImageIcon, Loader2 } from 'lucide-reac
 import { CloudinaryImagePicker } from './CloudinaryImagePicker';
 import { News } from '../../types';
 import { useToast } from '../../context/ToastContext';
+import { getAdminHeaders } from '../../utils/authHeaders';
 
 const API_BASE_URL = ((import.meta as any).env?.VITE_API_BASE_URL as string) || 'http://localhost:3009/api';
 
@@ -83,13 +84,13 @@ export const NewsManagement: React.FC = () => {
       if (editingArticle) {
         response = await fetch(`${API_BASE_URL}/news/${editingArticle.id}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminHeaders(),
           body: JSON.stringify(bodyData)
         });
       } else {
         response = await fetch(`${API_BASE_URL}/news`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminHeaders(),
           body: JSON.stringify(bodyData)
         });
       }
@@ -111,7 +112,8 @@ export const NewsManagement: React.FC = () => {
     if (!confirmed) return;
     try {
       const response = await fetch(`${API_BASE_URL}/news/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getAdminHeaders()
       });
       if (response.ok) {
         fetchArticles(currentPage);

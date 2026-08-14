@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { UserCheck, Shield, Lock, Unlock, ShieldAlert, Loader2, Phone, Mail } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { getAdminHeaders } from '../../utils/authHeaders';
 
 interface UserBackend {
   id: number;
@@ -57,7 +58,7 @@ export const UserManagement: React.FC = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/users/${user.id}/admin`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders(),
         body: JSON.stringify({ role: newRole })
       });
 
@@ -84,7 +85,7 @@ export const UserManagement: React.FC = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/users/${user.id}/admin`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders(),
         body: JSON.stringify({ is_locked: newLockStatus })
       });
 
