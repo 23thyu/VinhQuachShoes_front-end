@@ -34,14 +34,14 @@ export const ProductManagement: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [name, setName] = useState('');
-  const [price, setPrice] = useState(180 * 25000);
-  const [oldPrice, setOldPrice] = useState(0);
+  const [price, setPrice] = useState<number | string>('');
+  const [oldPrice, setOldPrice] = useState<number | string>('');
   const [description, setDescription] = useState('');
   const [specification, setSpecification] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [selectedBrandId, setSelectedBrandId] = useState('');
   const [image, setImage] = useState('');
-  const [quantity, setQuantity] = useState<number>(0);
+  const [quantity, setQuantity] = useState<number | string>('');
   
   // Cloudinary Picker state
   const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -113,53 +113,48 @@ export const ProductManagement: React.FC = () => {
   const handleOpenAdd = () => {
     setEditingProduct(null);
     setName('');
-    setPrice(190 * 25000);
-    setOldPrice(0);
+    setPrice('');
+    setOldPrice('');
     setDescription('');
     setSpecification('');
-    setSelectedCategoryId(categories[0]?.id.toString() || '');
-    setSelectedBrandId(brands[0]?.id.toString() || '');
+    setSelectedCategoryId('');
+    setSelectedBrandId('');
     setImage('');
-    setQuantity(0);
+    setQuantity('');
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (p: Product) => {
     setEditingProduct(p);
-    setName(p.name);
-    setPrice(p.price * 25000);
-    setOldPrice(p.oldprice ? p.oldprice * 25000 : 0);
-    setDescription(p.description);
+    setName(p.name || '');
+    setPrice(p.price !== undefined && p.price !== null ? p.price * 25000 : '');
+    setOldPrice(p.oldprice ? p.oldprice * 25000 : '');
+    setDescription(p.description || '');
     setSpecification(p.specification || '');
     setSelectedCategoryId(p.category_id?.toString() || '');
     setSelectedBrandId(p.brand_id?.toString() || '');
-    setImage(p.image);
-    setQuantity(p.quantity || 0);
+    setImage(p.image || '');
+    setQuantity(p.quantity !== undefined && p.quantity !== null ? p.quantity : '');
     setIsModalOpen(true);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) { toast.warning('VUI LÒNG NHẬP TÊN SẢN PHẨM'); return; }
-    if (!price) { toast.warning('VUI LÒNG NHẬP ĐƠN GIÁ'); return; }
-    if (!selectedCategoryId) { toast.warning('VUI LÒNG CHỌN DANH MỤC'); return; }
-    if (!selectedBrandId) { toast.warning('VUI LÒNG CHỌN THƯƠNG HIỆU'); return; }
-    if (!image) { toast.warning('VUI LÒNG CHỌN HÌNH ẢNH SẢN PHẨM'); return; }
 
     // Auto-generate a simple SKU based on timestamp for new products if missing
     const skuVal = editingProduct?.sku || `AJ-${Date.now().toString().slice(-4)}`;
 
     const bodyData = {
       name,
-      price: Number(price) / 25000,
+      price: price ? Number(price) / 25000 : 0,
       oldprice: oldPrice ? Number(oldPrice) / 25000 : null,
       description,
       specification,
-      category_id: Number(selectedCategoryId),
-      brand_id: Number(selectedBrandId),
+      category_id: selectedCategoryId ? Number(selectedCategoryId) : null,
+      brand_id: selectedBrandId ? Number(selectedBrandId) : null,
       image,
       sku: skuVal,
-      quantity: Number(quantity)
+      quantity: quantity !== '' ? Number(quantity) : 0
     };
 
     try {
@@ -445,10 +440,9 @@ export const ProductManagement: React.FC = () => {
                 
                 {/* Product Name */}
                 <div className="space-y-1">
-                  <label className="block text-[9px] text-zinc-550 uppercase tracking-widest">Tên sản phẩm</label>
+                  <label className="block text-[9px] text-zinc-550 uppercase tracking-widest">Tên sản phẩm (Tùy chọn)</label>
                   <input
                     type="text"
-                    required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="E.G. AIR JORDAN 1 RETRO HIGH CHICAGO"
@@ -459,12 +453,11 @@ export const ProductManagement: React.FC = () => {
                 {/* Pricing & Category dropdowns grid */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="block text-[9px] text-zinc-550 uppercase tracking-widest">Đơn giá (VNĐ)</label>
+                    <label className="block text-[9px] text-zinc-550 uppercase tracking-widest">Đơn giá (VNĐ - Tùy chọn)</label>
                     <input
                       type="number"
-                      required
                       value={price}
-                      onChange={(e) => setPrice(Number(e.target.value))}
+                      onChange={(e) => setPrice(e.target.value === '' ? '' : Number(e.target.value))}
                       className="w-full bg-zinc-900 border border-zinc-850 p-2.5 text-white focus:outline-none focus:border-white"
                     />
                   </div>
@@ -472,8 +465,8 @@ export const ProductManagement: React.FC = () => {
                     <label className="block text-[9px] text-zinc-555 uppercase tracking-widest">Đơn giá cũ (VNĐ - Tùy chọn)</label>
                     <input
                       type="number"
-                      value={oldPrice || ''}
-                      onChange={(e) => setOldPrice(Number(e.target.value))}
+                      value={oldPrice}
+                      onChange={(e) => setOldPrice(e.target.value === '' ? '' : Number(e.target.value))}
                       className="w-full bg-zinc-900 border border-zinc-850 p-2.5 text-white focus:outline-none focus:border-white"
                     />
                   </div>
@@ -487,7 +480,7 @@ export const ProductManagement: React.FC = () => {
                       onChange={(e) => setSelectedCategoryId(e.target.value)}
                       className="w-full bg-zinc-900 border border-zinc-850 p-2.5 text-white focus:outline-none focus:border-white rounded-none cursor-pointer"
                     >
-                      <option value="" disabled>CHỌN DANH MỤC</option>
+                      <option value="">KHÔNG CHỌN</option>
                       {categories.map(c => (
                         <option key={c.id} value={c.id}>{c.name.toUpperCase()}</option>
                       ))}
@@ -500,7 +493,7 @@ export const ProductManagement: React.FC = () => {
                       onChange={(e) => setSelectedBrandId(e.target.value)}
                       className="w-full bg-zinc-900 border border-zinc-850 p-2.5 text-white focus:outline-none focus:border-white rounded-none cursor-pointer"
                     >
-                      <option value="" disabled>CHỌN THƯƠNG HIỆU</option>
+                      <option value="">KHÔNG CHỌN</option>
                       {brands.map(b => (
                         <option key={b.id} value={b.id}>{b.name.toUpperCase()}</option>
                       ))}
@@ -510,10 +503,9 @@ export const ProductManagement: React.FC = () => {
                     <label className="block text-[9px] text-zinc-555 uppercase tracking-widest">Số lượng</label>
                     <input
                       type="number"
-                      required
                       min={0}
                       value={quantity}
-                      onChange={(e) => setQuantity(Number(e.target.value))}
+                      onChange={(e) => setQuantity(e.target.value === '' ? '' : Number(e.target.value))}
                       className="w-full bg-zinc-900 border border-zinc-850 p-2.5 text-white focus:outline-none focus:border-white"
                     />
                   </div>
@@ -521,9 +513,8 @@ export const ProductManagement: React.FC = () => {
 
                 {/* Description */}
                 <div className="space-y-1">
-                  <label className="block text-[9px] text-zinc-555 uppercase tracking-widest">Mô tả sản phẩm</label>
+                  <label className="block text-[9px] text-zinc-555 uppercase tracking-widest">Mô tả sản phẩm (Tùy chọn)</label>
                   <textarea
-                    required
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Mô tả bối cảnh lịch sử, chất liệu, tính năng thiết kế..."
