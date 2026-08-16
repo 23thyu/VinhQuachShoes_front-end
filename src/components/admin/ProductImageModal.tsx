@@ -40,7 +40,8 @@ export const ProductImageModal: React.FC<ProductImageModalProps> = ({ isOpen, on
         const result = await response.json();
         setImages(result.data || []);
       } else {
-        toast.error('LỖI KHI TẢI DANH SÁCH ẢNH PHỤ');
+        const result = await response.json().catch(() => ({}));
+        toast.error(result.message || 'LỖI KHI TẢI DANH SÁCH ẢNH PHỤ');
       }
     } catch (error) {
       console.error('Error fetching secondary images:', error);
