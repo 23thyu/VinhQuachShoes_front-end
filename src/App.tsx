@@ -215,20 +215,24 @@ function AppContent() {
 
                 {/* Search / Filter Empty State */}
                 {filteredProducts.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 font-mono text-xs">
-                    <Box className="h-10 w-10 text-zinc-800 stroke-[1]" />
-                    <p className="text-zinc-500 uppercase tracking-widest">QUERY VACANT FROM ARCHIVES</p>
-                    <p className="text-zinc-600 lowercase font-light max-w-sm">
-                      the search parameters "{searchQuery}" do not correspond to any registered Jordan silhouette model.
+                  <div className="flex flex-col items-center justify-center py-20 text-center font-mono">
+                    <Box className="h-10 w-10 text-zinc-800 stroke-[1] mb-4" />
+                    <h4 className="font-bold text-white text-xl uppercase tracking-widest mb-4">
+                      KHÔNG TÌM THẤY SẢN PHẨM
+                    </h4>
+                    <p className="font-mono text-zinc-400 text-xs uppercase tracking-wider mb-8 text-center max-w-md">
+                      {searchQuery
+                        ? `Từ khóa "${searchQuery}" không khớp với bất kỳ mẫu giày nào trong bộ sưu tập.`
+                        : 'Không có sản phẩm nào phù hợp với bộ lọc danh mục hiện tại.'}
                     </p>
                     <button
                       onClick={() => {
                         setSearchQuery('');
                         setSelectedCategory('All');
                       }}
-                      className="border border-zinc-800 hover:border-white px-4 py-2 uppercase text-[10px] tracking-widest text-zinc-300 hover:text-white transition-all cursor-pointer flex items-center gap-1"
+                      className="border border-zinc-700 text-zinc-400 hover:text-white hover:border-white px-6 py-3 font-mono text-xs uppercase tracking-widest transition-colors flex items-center justify-center gap-2 rounded-none cursor-pointer"
                     >
-                      <RotateCcw className="h-3 w-3" /> RESET QUERY ARCHIVES
+                      <RotateCcw className="h-4 w-4" /> XÓA TÌM KIẾM
                     </button>
                   </div>
                 ) : (
