@@ -35,7 +35,7 @@ export const ProductImageModal: React.FC<ProductImageModalProps> = ({ isOpen, on
   const fetchImages = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/product-images?product_id=${productId}`);
+      const response = await fetch(`${API_BASE_URL}/product-images?product_id=${productId}&limit=25`);
       if (response.ok) {
         const result = await response.json();
         setImages(result.data || []);
@@ -56,26 +56,27 @@ export const ProductImageModal: React.FC<ProductImageModalProps> = ({ isOpen, on
     }
   }, [productId, isOpen]);
 
-  const handleAddImage = async (url: string) => {
+  const handleAddMultipleImages = async (urls: string[]) => {
+    if (!urls || urls.length === 0) return;
     try {
       const response = await fetch(`${API_BASE_URL}/product-images`, {
         method: 'POST',
         headers: getAdminHeaders(),
         body: JSON.stringify({
           product_id: Number(productId),
-          image_url: url,
+          image_urls: urls,
         }),
       });
 
       const result = await response.json();
       if (response.ok) {
-        toast.success('THÊM ẢNH PHỤ THÀNH CÔNG');
+        toast.success(result.message || 'THÊM ẢNH PHỤ THÀNH CÔNG');
         fetchImages();
       } else {
         toast.error(result.message || 'LỖI KHI THÊM ẢNH PHỤ');
       }
     } catch (error) {
-      console.error('Error adding image:', error);
+      console.error('Error adding images:', error);
       toast.error('LỖI KẾT NỐI SERVER KHI THÊM ẢNH');
     }
   };
@@ -101,6 +102,8 @@ export const ProductImageModal: React.FC<ProductImageModalProps> = ({ isOpen, on
   };
 
   if (!isOpen) return null;
+
+  const isMaxReached = images.length >= 25;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -128,7 +131,7 @@ export const ProductImageModal: React.FC<ProductImageModalProps> = ({ isOpen, on
             PRODUCT ID: #{productId}
           </span>
           <h3 className="font-display text-base font-black uppercase tracking-tight mt-1 text-white">
-            QUẢN LÝ HÌNH ẢNH PHỤ
+            QUẢN LÝ HÌNH ẢNH PHỤ (TỐI ĐA 25 ẢNH)
           </h3>
         </div>
 
@@ -137,19 +140,30 @@ export const ProductImageModal: React.FC<ProductImageModalProps> = ({ isOpen, on
           {/* Upload Dash Box */}
           <button
             type="button"
-            onClick={() => setIsPickerOpen(true)}
-            className="w-full border-2 border-dashed border-zinc-700 hover:border-white bg-zinc-950/20 p-8 flex flex-col items-center justify-center cursor-pointer transition-colors rounded-none"
+            disabled={isMaxReached}
+            onClick={() => {
+              if (isMaxReached) {
+                toast.warning('ĐÃ ĐẠT TỐI ĐA 25 HÌNH ẢNH PHỤ CHO SẢN PHẨM NÀY!');
+              } else {
+                setIsPickerOpen(true);
+              }
+            }}
+            className={`w-full border-2 border-dashed ${
+              isMaxReached
+                ? 'border-zinc-850 opacity-50 cursor-not-allowed bg-zinc-950'
+                : 'border-zinc-700 hover:border-white bg-zinc-950/20 cursor-pointer'
+            } p-8 flex flex-col items-center justify-center transition-colors rounded-none`}
           >
             <Plus className="h-6 w-6 text-zinc-500 mb-2 stroke-[1.5]" />
             <span className="font-mono text-xs uppercase tracking-widest font-semibold text-white">
-              TẢI ẢNH LÊN
+              {isMaxReached ? 'ĐÃ ĐẠT GIỚI HẠN 25 ẢNH PHỤ' : 'CHỌN/TẢI NỒI BỘ NHIỀU ẢNH PHỤ'}
             </span>
           </button>
 
           {/* Current Secondary Images list */}
           <div>
             <h4 className="font-mono text-[10px] uppercase tracking-wider text-zinc-500 mb-3 font-semibold">
-              DANH SÁCH ẢNH HIỆN TẠI ({images.length})
+              DANH SÁCH ẢNH HIỆN TẠI ({images.length}/25)
             </h4>
 
             {loading ? (
@@ -206,7 +220,9 @@ export const ProductImageModal: React.FC<ProductImageModalProps> = ({ isOpen, on
       <CloudinaryImagePicker
         isOpen={isPickerOpen}
         onClose={() => setIsPickerOpen(false)}
-        onSelect={(url) => handleAddImage(url)}
+        isMulti={true}
+        maxSelect={Math.max(0, 25 - images.length)}
+        onSelectMultiple={(urls) => handleAddMultipleImages(urls)}
       />
     </div>
   );

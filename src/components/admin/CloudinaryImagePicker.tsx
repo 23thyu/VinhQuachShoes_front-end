@@ -20,8 +20,12 @@ interface MediaItem {
 interface CloudinaryImagePickerProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (url: string) => void;
+  onSelect?: (url: string) => void;
+  onSelectMultiple?: (urls: string[]) => void;
   selectedUrl?: string;
+  selectedUrls?: string[];
+  isMulti?: boolean;
+  maxSelect?: number;
 }
 
 const API_BASE_URL = ((import.meta as any).env?.VITE_API_BASE_URL as string) || 'http://localhost:3009/api';
@@ -30,7 +34,11 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
   isOpen,
   onClose,
   onSelect,
-  selectedUrl
+  onSelectMultiple,
+  selectedUrl,
+  selectedUrls,
+  isMulti = false,
+  maxSelect
 }) => {
   const [activeTab, setActiveTab] = useState<'upload' | 'library'>('library');
   const { toast, confirmModal } = useToast();
@@ -41,7 +49,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [highlightedUrl, setHighlightedUrl] = useState<string>(selectedUrl || '');
+  const [selectedList, setSelectedList] = useState<string[]>([]);
   
   // Upload state
   const [uploading, setUploading] = useState<boolean>(false);
@@ -72,9 +80,32 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
   useEffect(() => {
     if (isOpen) {
       fetchMedia(currentPage, searchQuery);
-      setHighlightedUrl(selectedUrl || '');
+      if (isMulti) {
+        setSelectedList(selectedUrls || []);
+      } else if (selectedUrl) {
+        setSelectedList([selectedUrl]);
+      } else {
+        setSelectedList([]);
+      }
     }
   }, [isOpen, currentPage, searchQuery]);
+
+  // Toggle selection logic
+  const toggleSelectImage = (url: string) => {
+    if (isMulti) {
+      if (selectedList.includes(url)) {
+        setSelectedList(prev => prev.filter(u => u !== url));
+      } else {
+        if (maxSelect !== undefined && selectedList.length >= maxSelect) {
+          toast.warning(`TỐI ĐA CHỈ ĐƯỢC CHỌN ${maxSelect} HÌNH ẢNH!`);
+          return;
+        }
+        setSelectedList(prev => [...prev, url]);
+      }
+    } else {
+      setSelectedList([url]);
+    }
+  };
 
   // Handle Drag Events
   const handleDrag = (e: React.DragEvent) => {
@@ -87,12 +118,12 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
     }
   };
 
-  // Upload file logic
+  // Upload file logic (up to 25 files at once)
   const uploadFiles = async (files: FileList) => {
     setUploading(true);
     const formData = new FormData();
-    // The backend multer is configured for array upload with field name "images"
-    for (let i = 0; i < Math.min(files.length, 5); i++) {
+    // Up to 25 images
+    for (let i = 0; i < Math.min(files.length, 25); i++) {
       formData.append('images', files[i]);
     }
 
@@ -106,9 +137,17 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
       if (response.ok) {
         const result = await response.json();
         const uploadedRecords = result.data || [];
-        if (uploadedRecords.length > 0) {
-          // Highlight the first uploaded image
-          setHighlightedUrl(uploadedRecords[0].url);
+        const uploadedUrls = uploadedRecords.map((r: any) => r.url);
+        
+        if (uploadedUrls.length > 0) {
+          if (isMulti) {
+            setSelectedList(prev => {
+              const combined = [...prev, ...uploadedUrls];
+              return maxSelect ? combined.slice(0, maxSelect) : combined;
+            });
+          } else {
+            setSelectedList([uploadedUrls[0]]);
+          }
         }
         // Refresh library and switch tab
         setActiveTab('library');
@@ -157,10 +196,11 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
       });
 
       if (response.ok) {
-        setMediaItems(prev => prev.filter(item => item.id !== id));
-        if (highlightedUrl && mediaItems.find(item => item.id === id)?.url === highlightedUrl) {
-          setHighlightedUrl('');
+        const target = mediaItems.find(item => item.id === id);
+        if (target) {
+          setSelectedList(prev => prev.filter(url => url !== target.url));
         }
+        setMediaItems(prev => prev.filter(item => item.id !== id));
       } else {
         toast.error('LỖI KHI XÓA TẬP TIN');
       }
@@ -170,8 +210,12 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
   };
 
   const handleConfirmSelection = () => {
-    if (highlightedUrl) {
-      onSelect(highlightedUrl);
+    if (selectedList.length > 0) {
+      if (isMulti && onSelectMultiple) {
+        onSelectMultiple(selectedList);
+      } else if (onSelect) {
+        onSelect(selectedList[0]);
+      }
       onClose();
     }
   };
@@ -194,7 +238,9 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-900">
           <div>
             <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-zinc-500">MEDIA SERVICE</span>
-            <h3 className="text-base font-bold uppercase tracking-wide mt-0.5">CLOUDINARY RESOURCE PICKER</h3>
+            <h3 className="text-base font-bold uppercase tracking-wide mt-0.5">
+              CLOUDINARY RESOURCE PICKER {isMulti ? '(CHỌN NHIỀU ẢNH)' : ''}
+            </h3>
           </div>
           <button
             onClick={onClose}
@@ -269,7 +315,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
                         KÉO THẢ ẢNH VÀO ĐÂY HOẶC CLICK ĐỂ TẢI LÊN
                       </p>
                       <p className="text-[10px] text-zinc-500 font-mono mt-1.5 lowercase">
-                        supports jpg, png, webp. max 5 files at a time.
+                        supports jpg, png, webp. max 25 files at a time.
                       </p>
                     </div>
                   </div>
@@ -310,11 +356,12 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3">
                   {mediaItems.map((item) => {
-                    const isSelected = highlightedUrl === item.url;
+                    const isSelected = selectedList.includes(item.url);
+                    const selectedIndex = selectedList.indexOf(item.url);
                     return (
                       <div
                         key={item.id}
-                        onClick={() => setHighlightedUrl(item.url)}
+                        onClick={() => toggleSelectImage(item.url)}
                         onDoubleClick={handleConfirmSelection}
                         className={`group relative aspect-square border bg-zinc-900 cursor-pointer overflow-hidden select-none transition-all ${
                           isSelected
@@ -342,8 +389,11 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
                         {/* Selection check overlay */}
                         {isSelected && (
                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
-                            <span className="bg-white text-black p-0.5 border border-white">
+                            <span className="bg-white text-black px-1.5 py-0.5 border border-white font-mono text-[10px] font-bold flex items-center gap-1">
                               <Check className="h-3.5 w-3.5 stroke-[3]" />
+                              {isMulti && selectedList.length > 1 && (
+                                <span>{selectedIndex + 1}</span>
+                              )}
                             </span>
                           </div>
                         )}
@@ -387,9 +437,11 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
 
         {/* Footer actions */}
         <div className="px-6 py-4 border-t border-zinc-900 bg-zinc-950 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <div className="font-mono text-[9px] tracking-wider text-zinc-550 truncate max-w-sm sm:max-w-md uppercase">
-            {highlightedUrl ? (
-              <span className="text-zinc-350">ĐÃ CHỌN: {highlightedUrl}</span>
+          <div className="font-mono text-[9px] tracking-wider text-zinc-350 truncate max-w-sm sm:max-w-md uppercase">
+            {selectedList.length > 0 ? (
+              <span>
+                ĐÃ CHỌN ({selectedList.length}{maxSelect ? `/${maxSelect}` : ''}): {selectedList.join(', ')}
+              </span>
             ) : (
               'CHƯA CHỌN TẬP TIN'
             )}
@@ -397,7 +449,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
           <div className="flex gap-2 w-full sm:w-auto">
             <button
               onClick={handleConfirmSelection}
-              disabled={!highlightedUrl}
+              disabled={selectedList.length === 0}
               className="flex-1 sm:flex-initial border border-white bg-white text-black px-6 py-2.5 font-mono text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white hover:border-zinc-800 disabled:opacity-50 disabled:pointer-events-none transition-all rounded-none cursor-pointer"
             >
               Xác nhận chọn
