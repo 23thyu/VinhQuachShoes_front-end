@@ -59,19 +59,22 @@ export const ProductManagement: React.FC = () => {
   const fetchProducts = async (page = 1, searchQuery = '', catId = '', bId = '') => {
     setLoading(true);
     try {
-      let url = `${API_BASE_URL}/products?page=${page}&limit=8&search=${searchQuery}`;
+      let url = `${API_BASE_URL}/products?page=${page}&limit=8&search=${encodeURIComponent(searchQuery)}`;
       if (catId) url += `&category_id=${catId}`;
       if (bId) url += `&brand_id=${bId}`;
       
       const response = await fetch(url);
       if (response.ok) {
         const result = await response.json();
-        setProducts(result.data || []);
+        setProducts(Array.isArray(result.data) ? result.data : []);
         setCurrentPage(result.current_page || 1);
         setTotalPages(result.total_page || 1);
+      } else {
+        setProducts([]);
       }
     } catch (error) {
       console.error('Error fetching products:', error);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -289,10 +292,6 @@ export const ProductManagement: React.FC = () => {
             <Loader2 className="h-6 w-6 animate-spin text-zinc-500 mb-2" />
             LOADING PHYSICAL INVENTORY...
           </div>
-        ) : products.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center font-mono text-xs text-zinc-650">
-            KHÔNG TÌM THẤY SẢN PHẨM NÀO KHỚP VỚI BỘ LỌC
-          </div>
         ) : (
           <div className="overflow-x-auto w-full">
             <table className="w-full text-left font-mono text-xs text-zinc-400 border-collapse">
@@ -309,86 +308,97 @@ export const ProductManagement: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-950">
-                {products.map((p) => {
-                  const categoryName = typeof p.category === 'object' && p.category ? (p.category as any).name : p.category;
-                  const brandName = p.brand ? p.brand.name : '—';
-                  
-                  return (
-                    <tr key={p.id} className="hover:bg-zinc-900/20 transition-colors">
-                      {/* ID */}
-                      <td className="py-3.5 text-zinc-500">#{p.id}</td>
+                {!products || products.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={8}
+                      className="text-center py-12 font-mono text-zinc-500 uppercase tracking-widest text-sm border-b border-zinc-800 bg-black"
+                    >
+                      KHÔNG TÌM THẤY SẢN PHẨM NÀO KHỚP VỚI TỪ KHÓA.
+                    </td>
+                  </tr>
+                ) : (
+                  (products || []).map((p) => {
+                    const categoryName = typeof p.category === 'object' && p.category ? (p.category as any).name : p.category;
+                    const brandName = p.brand ? p.brand.name : '—';
+                    
+                    return (
+                      <tr key={p.id} className="hover:bg-zinc-900/20 transition-colors">
+                        {/* ID */}
+                        <td className="py-3.5 text-zinc-500">#{p.id}</td>
 
-                      {/* Image Thumbnail */}
-                      <td className="py-3.5">
-                        <div className="h-12 w-12 border border-zinc-900 bg-zinc-950 flex items-center justify-center p-1 overflow-hidden">
-                          {p.image ? (
-                            <img
-                              src={p.image}
-                              alt={p.name}
-                              className="h-full w-full object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]"
-                              referrerPolicy="no-referrer"
-                            />
-                          ) : (
-                            <span className="text-[8px] text-zinc-700">NO IMG</span>
-                          )}
-                        </div>
-                      </td>
+                        {/* Image Thumbnail */}
+                        <td className="py-3.5">
+                          <div className="h-12 w-12 border border-zinc-900 bg-zinc-950 flex items-center justify-center p-1 overflow-hidden">
+                            {p.image ? (
+                              <img
+                                src={p.image}
+                                alt={p.name || 'Sản phẩm'}
+                                className="h-full w-full object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]"
+                                referrerPolicy="no-referrer"
+                              />
+                            ) : (
+                              <span className="text-[8px] text-zinc-700">NO IMG</span>
+                            )}
+                          </div>
+                        </td>
 
-                      {/* Name */}
-                      <td className="py-3.5 pr-4 max-w-[200px] truncate">
-                        <p className="text-white font-bold uppercase truncate">{p.name}</p>
-                        <p className="text-[8px] text-zinc-600 mt-0.5">SKU: {p.sku}</p>
-                      </td>
+                        {/* Name */}
+                        <td className="py-3.5 pr-4 max-w-[200px] truncate">
+                          <p className="text-white font-bold uppercase truncate">{p.name || '—'}</p>
+                          <p className="text-[8px] text-zinc-600 mt-0.5">SKU: {p.sku || '—'}</p>
+                        </td>
 
-                      {/* Price */}
-                      <td className="py-3.5 text-white font-bold">{(p.price * 25000).toLocaleString('vi-VN')} ₫</td>
+                        {/* Price */}
+                        <td className="py-3.5 text-white font-bold">{p.price ? (p.price * 25000).toLocaleString('vi-VN') + ' ₫' : '0 ₫'}</td>
 
-                      {/* Stock quantity */}
-                      <td className="py-3.5 text-zinc-300 font-bold">{p.quantity || 0}</td>
+                        {/* Stock quantity */}
+                        <td className="py-3.5 text-zinc-300 font-bold">{p.quantity || 0}</td>
 
-                      {/* Category */}
-                      <td className="py-3.5 text-zinc-400 uppercase text-[10px]">{categoryName}</td>
+                        {/* Category */}
+                        <td className="py-3.5 text-zinc-400 uppercase text-[10px]">{categoryName || '—'}</td>
 
-                      {/* Brand */}
-                      <td className="py-3.5 text-zinc-400 uppercase text-[10px]">{brandName}</td>
+                        {/* Brand */}
+                        <td className="py-3.5 text-zinc-400 uppercase text-[10px]">{brandName || '—'}</td>
 
-                      {/* Actions */}
-                      <td className="py-3.5 text-center">
-                        <div className="inline-flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleOpenProductImages(p.id)}
-                            className="p-1.5 border border-zinc-900 bg-zinc-950/60 hover:border-zinc-700 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-                            title="Quản lý ảnh phụ"
-                          >
-                            <ImageIcon className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleOpenEdit(p)}
-                            className="p-1.5 border border-zinc-900 bg-zinc-950/60 hover:border-zinc-700 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-                            title="Sửa sản phẩm"
-                          >
-                            <Edit3 className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(p.id)}
-                            className="p-1.5 border border-zinc-900 bg-zinc-950/60 hover:border-red-950 text-zinc-450 hover:text-red-400 transition-colors cursor-pointer"
-                            title="Xóa sản phẩm"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                        {/* Actions */}
+                        <td className="py-3.5 text-center">
+                          <div className="inline-flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenProductImages(p.id)}
+                              className="p-1.5 border border-zinc-900 bg-zinc-950/60 hover:border-zinc-700 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                              title="Quản lý ảnh phụ"
+                            >
+                              <ImageIcon className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleOpenEdit(p)}
+                              className="p-1.5 border border-zinc-900 bg-zinc-950/60 hover:border-zinc-700 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                              title="Sửa sản phẩm"
+                            >
+                              <Edit3 className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(p.id)}
+                              className="p-1.5 border border-zinc-900 bg-zinc-950/60 hover:border-red-950 text-zinc-450 hover:text-red-400 transition-colors cursor-pointer"
+                              title="Xóa sản phẩm"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
         )}
 
         {/* Pagination */}
-        {!loading && totalPages > 1 && (
+        {!loading && (products || []).length > 0 && totalPages > 1 && (
           <div className="flex items-center justify-end font-mono text-[9px] tracking-widest text-zinc-500 pt-4 border-t border-zinc-955 gap-2">
             <button
               disabled={currentPage <= 1}
