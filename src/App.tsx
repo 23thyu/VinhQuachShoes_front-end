@@ -99,12 +99,18 @@ function AppContent() {
   };
 
   // Filter products based on search queries and categories
-  const filteredProducts = products.filter((product) => {
+  const filteredProducts = (products || []).filter((product) => {
+    if (!product) return false;
     const matchesCategory = selectedCategory === 'All' || String(product.category_id) === selectedCategory;
+    const searchLower = (searchQuery || '').toLowerCase();
+    const nameStr = (product.name || '').toLowerCase();
+    const skuStr = (product.sku || '').toLowerCase();
+    const descStr = (product.description || '').toLowerCase();
+
     const matchesSearch =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase());
+      nameStr.includes(searchLower) ||
+      skuStr.includes(searchLower) ||
+      descStr.includes(searchLower);
     return matchesCategory && matchesSearch;
   });
 

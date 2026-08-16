@@ -14,6 +14,11 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) => {
+  if (!product) return null;
+
+  const priceVal = typeof product.price === 'number' ? product.price * 25000 : (Number(product.price || 0) * 25000);
+  const categoryName = typeof product.category === 'object' && product.category ? (product.category as any).name : (product.category || 'JORDAN');
+
   // Motion values for 3D tilt effect
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -61,13 +66,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
         id={`product-card-${product.id}`}
       >
         {/* Release year and metadata - high-end look */}
-        <div className="flex items-center justify-between font-mono text-[9px] tracking-widest text-zinc-550 uppercase z-10">
+        <div className="flex items-center justify-between font-mono text-[9px] tracking-widest text-zinc-555 uppercase z-10">
           <span className="flex items-center gap-1">
             <Calendar className="h-3 w-3" />
-            {product.releaseYear} EDITION
+            {product.releaseYear || 2026} EDITION
           </span>
           <span className="border border-zinc-850 px-1.5 py-0.5">
-            {typeof product.category === 'object' && product.category ? (product.category as any).name : product.category}
+            {categoryName}
           </span>
         </div>
 
@@ -80,12 +85,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
           <div className="absolute top-1/2 left-1/2 h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full bg-zinc-900/35 blur-3xl group-hover:bg-zinc-900/50 transition-colors" />
 
           {/* Product Image */}
-          <motion.img
-            src={product.image}
-            alt={product.name}
-            referrerPolicy="no-referrer"
-            className="h-full max-h-[160px] sm:max-h-[200px] object-contain transition-transform duration-500 ease-out group-hover:scale-108 group-hover:-rotate-3 drop-shadow-[0_15px_20px_rgba(0,0,0,0.8)]"
-          />
+          {product.image ? (
+            <motion.img
+              src={product.image}
+              alt={product.name || 'Sản phẩm'}
+              referrerPolicy="no-referrer"
+              className="h-full max-h-[160px] sm:max-h-[200px] object-contain transition-transform duration-500 ease-out group-hover:scale-108 group-hover:-rotate-3 drop-shadow-[0_15px_20px_rgba(0,0,0,0.8)]"
+            />
+          ) : (
+            <div className="font-mono text-xs text-zinc-650 uppercase tracking-widest">
+              NO IMAGE
+            </div>
+          )}
 
           {/* Eye hover trigger */}
           <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-350">
@@ -103,14 +114,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
         >
           <div className="flex justify-between items-start gap-4">
             <h4 className="font-display text-sm font-semibold tracking-wide text-white uppercase group-hover:text-zinc-300 transition-colors truncate max-w-[80%]">
-              {product.name}
+              {product.name || 'SẢN PHẨM KHÔNG TÊN'}
             </h4>
             <span className="font-mono text-sm font-medium tracking-wider text-zinc-350">
-              {(product.price * 25000).toLocaleString('vi-VN')} ₫
+              {priceVal.toLocaleString('vi-VN')} ₫
             </span>
           </div>
           <p className="font-mono text-[9px] text-zinc-600 mt-1 uppercase tracking-wider">
-            SKU: {product.sku}
+            SKU: {product.sku || 'N/A'}
           </p>
         </div>
       </motion.div>
