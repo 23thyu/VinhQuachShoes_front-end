@@ -8,6 +8,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { Navbar } from './components/customer/Navbar';
 import { HeroBanner } from './components/customer/HeroBanner';
+import { CustomerArchives } from './components/customer/CustomerArchives';
 import { BentoBannerGrid } from './components/customer/BentoBannerGrid';
 import { ProductCard } from './components/customer/ProductCard';
 import { ProductDetailsModal } from './components/customer/ProductDetailsModal';
@@ -146,6 +147,7 @@ function AppContent() {
               {!isFiltering && (
                 <>
                   <HeroBanner />
+                  <CustomerArchives />
                   <BentoBannerGrid />
                 </>
               )}

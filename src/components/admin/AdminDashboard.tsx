@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   AlertCircle, ShoppingBag, ShieldAlert, BarChart3, TrendingUp,
-  X, FolderOpen, Award, ClipboardList, Settings, Users, Image as ImageIcon, Flag, Newspaper, Loader2
+  X, FolderOpen, Award, ClipboardList, Settings, Users, Image as ImageIcon, Flag, Newspaper, Loader2, MessageSquare
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -21,11 +21,12 @@ import { UserManagement } from './User';
 import { MediaLibrary } from './Media';
 import { BannerManagement } from './Banner';
 import { NewsManagement } from './News';
+import { FeedbackAdmin } from './FeedbackAdmin';
 
 import { getAdminHeaders } from '../../utils/authHeaders';
 
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'variants' | 'categories' | 'brands' | 'orders' | 'users' | 'media' | 'banners' | 'news'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'variants' | 'categories' | 'brands' | 'orders' | 'users' | 'media' | 'banners' | 'news' | 'feedbacks'>('overview');
 
   // Real Database Overview State
   const [products, setProducts] = useState<any[]>([]);
@@ -209,6 +210,7 @@ export const AdminDashboard: React.FC = () => {
             { id: 'media', label: 'Thư viện hình ảnh', icon: <ImageIcon className="h-4 w-4" /> },
             { id: 'banners', label: 'Quản lý banner', icon: <Flag className="h-4 w-4" /> },
             { id: 'news', label: 'Quản lý bài viết', icon: <Newspaper className="h-4 w-4" /> },
+            { id: 'feedbacks', label: 'Quản lý Feedback', icon: <MessageSquare className="h-4 w-4" /> },
           ].map(tab => (
             <button
               key={tab.id}
@@ -246,6 +248,7 @@ export const AdminDashboard: React.FC = () => {
             {activeTab === 'media' && <MediaLibrary />}
             {activeTab === 'banners' && <BannerManagement />}
             {activeTab === 'news' && <NewsManagement />}
+            {activeTab === 'feedbacks' && <FeedbackAdmin />}
           </motion.div>
         </AnimatePresence>
       </div>
