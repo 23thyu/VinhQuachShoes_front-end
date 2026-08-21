@@ -5,15 +5,11 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
-import { useApp } from '../../context/AppContext';
-import { useToast } from '../../context/ToastContext';
-import { ChevronDown, ArrowRight } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 export const HeroBanner: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { products, addToCart, variants } = useApp();
-  const { toast } = useToast();
 
   // Scroll tracker over the 400vh scroll height
   const { scrollYProgress } = useScroll({
@@ -38,19 +34,7 @@ export const HeroBanner: React.FC = () => {
   const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '110%']);
   const bgOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
-  const handleQuickAdd = () => {
-    const targetProduct = products.find(p => p.sku === 'AJ1-85-CHIC' || p.name.toLowerCase().includes('chicago')) || products[0];
-    if (targetProduct) {
-      const matchVariant = variants.find(v => String(v.productId) === String(targetProduct.id) && v.stock > 0);
-      if (matchVariant) {
-        addToCart(String(targetProduct.id), String(matchVariant.id), 1);
-      } else {
-        toast.warning('SẢN PHẨM CHICAGO HOẶC SẢN PHẨM THAY THẾ HIỆN ĐÃ HẾT HÀNG');
-      }
-    } else {
-      toast.warning('KHÔNG CÓ SẢN PHẨM NÀO KHẢ DỤNG ĐỂ MUA NHANH');
-    }
-  };
+
 
   // Preload all 99 frames of the sneaker
   useEffect(() => {
@@ -195,16 +179,8 @@ export const HeroBanner: React.FC = () => {
               Phối màu Chicago kinh điển gắn liền với tên tuổi Michael Jordan năm 1984. Chất liệu da Tumbled nguyên bản, form dáng OG 1985 sắc nét.
             </p>
 
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2 md:pt-4">
-              <button
-                onClick={handleQuickAdd}
-                className="flex items-center gap-2 border border-white bg-white text-black px-4 py-2 md:px-6 md:py-3 font-mono text-[10px] md:text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white hover:border-zinc-700 transition-all rounded-none cursor-pointer group"
-                id="hero-buy-btn"
-              >
-                MUA NGAY 'CHICAGO'
-                <ArrowRight className="h-4 w-4 md:h-4.5 md:w-4.5 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <span className="font-mono text-base md:text-xl font-medium tracking-wider text-zinc-300">
+            <div className="pt-2 md:pt-4">
+              <span className="font-mono text-xl text-white font-bold tracking-widest uppercase">
                 {(190 * 25000).toLocaleString('vi-VN')} ₫
               </span>
             </div>

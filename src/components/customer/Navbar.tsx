@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { useToast } from '../../context/ToastContext';
-import { ShoppingBag, User as UserIcon, Search, ShieldAlert, ShoppingCart, LogOut, Check } from 'lucide-react';
+import { User as UserIcon, Search, ShieldAlert, LogOut, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export const Navbar: React.FC = () => {
@@ -18,8 +18,6 @@ export const Navbar: React.FC = () => {
     setActiveView,
     activeClientTab,
     setActiveClientTab,
-    cart,
-    setIsCartOpen,
     searchQuery,
     setSearchQuery,
     selectedCategory,
@@ -29,7 +27,6 @@ export const Navbar: React.FC = () => {
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   // Helper: push '/' to history and dispatch popstate so App.tsx clears selectedProductId
   const navigateHome = () => {
@@ -172,28 +169,7 @@ export const Navbar: React.FC = () => {
             </div>
           )}
 
-          {/* Cart Trigger */}
-          {activeView === 'client' && (
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="relative p-2 text-zinc-450 hover:text-white transition-colors cursor-pointer"
-              id="cart-trigger-btn"
-            >
-              <ShoppingBag className="h-5 w-5" />
-              <AnimatePresence>
-                {cartItemCount > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-none bg-white text-[9px] font-mono font-bold text-black"
-                  >
-                    {cartItemCount}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </button>
-          )}
+
 
           {/* Account tab button / User Dropdown */}
           <div className="relative">
