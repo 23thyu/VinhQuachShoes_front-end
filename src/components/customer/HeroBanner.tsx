@@ -45,7 +45,7 @@ export const HeroBanner: React.FC = () => {
     for (let i = 1; i <= 99; i++) {
       const img = new Image();
       const num = String(i).padStart(4, '0');
-      
+
       // Try local assets first, fall back to /giay/ if needed
       img.src = useGiayFallback ? `/giay/frame_${num}.jpg` : `/assets/frame/frame_${num}.jpg`;
 
@@ -138,14 +138,14 @@ export const HeroBanner: React.FC = () => {
     >
       {/* Sticky Frame Container */}
       <div className="sticky top-0 min-h-[100dvh] h-[100dvh] w-full flex flex-col justify-between py-8 md:py-0 md:justify-center items-center overflow-hidden">
-        
+
         {/* Brutalist Parallax Typographic Background */}
         <motion.div
           style={{ y: bgY, scale: bgScale, opacity: bgOpacity }}
           className="absolute inset-0 flex flex-col items-center justify-center select-none pointer-events-none z-0"
         >
           <h1 className="font-display text-[15vw] font-black leading-none tracking-tighter text-zinc-900 text-center uppercase">
-            FLIGHT
+            VINH QUACH
           </h1>
           <div className="hidden md:flex w-full max-w-7xl justify-between px-10 text-[10px] font-mono tracking-[0.3em] text-zinc-800">
             <span>KHỞI NGUỒN: 1985</span>
@@ -156,7 +156,7 @@ export const HeroBanner: React.FC = () => {
 
         {/* Layout Grid */}
         <div className="relative mx-auto flex flex-col justify-center items-center gap-4 md:grid md:grid-cols-2 md:gap-8 z-10 px-4 sm:px-6 lg:px-8 w-full max-w-7xl mt-12 md:mt-0">
-          
+
           {/* Left Details */}
           <motion.div
             style={{ opacity: textOpacity, y: textYOffset }}
