@@ -30,6 +30,20 @@ interface CloudinaryImagePickerProps {
 
 const API_BASE_URL = ((import.meta as any).env?.VITE_API_BASE_URL as string) || 'http://localhost:3009/api';
 
+export const getOptimizedImageUrl = (url: string | undefined | null): string => {
+  if (!url) return '';
+  let formatted = url;
+  if (formatted.includes('res.cloudinary.com')) {
+    if (!formatted.includes('/f_auto')) {
+      formatted = formatted.replace('/upload/', '/upload/f_auto,q_auto/');
+    }
+    formatted = formatted.replace(/\.(heic|heif)$/i, '.jpg');
+  } else if (/\.(heic|heif)$/i.test(formatted)) {
+    formatted = formatted.replace(/\.(heic|heif)$/i, '.jpg');
+  }
+  return formatted;
+};
+
 export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
   isOpen,
   onClose,
@@ -64,7 +78,11 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
       const response = await fetch(`${API_BASE_URL}/media?page=${page}&limit=10&search=${search}`);
       if (response.ok) {
         const result = await response.json();
-        setMediaItems(result.data || []);
+        const items = (result.data || []).map((item: MediaItem) => ({
+          ...item,
+          url: getOptimizedImageUrl(item.url)
+        }));
+        setMediaItems(items);
         setCurrentPage(result.current_page || 1);
         setTotalPages(result.total_page || 1);
       } else {
@@ -371,7 +389,7 @@ export const CloudinaryImagePicker: React.FC<CloudinaryImagePickerProps> = ({
                       >
                         {/* Display Image */}
                         <img
-                          src={item.url}
+                          src={getOptimizedImageUrl(item.url)}
                           alt={item.name}
                           referrerPolicy="no-referrer"
                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
