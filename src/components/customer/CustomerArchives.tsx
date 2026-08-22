@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export interface FeedbackItem {
   id: string | number;
@@ -14,9 +14,26 @@ export interface FeedbackItem {
 
 const API_BASE_URL = ((import.meta as any).env?.VITE_API_BASE_URL as string) || 'http://localhost:3009/api';
 
+const getOptimizedImageUrl = (url: string | undefined | null): string => {
+  if (!url) return '';
+  let formatted = url;
+  if (formatted.includes('res.cloudinary.com')) {
+    if (!formatted.includes('/f_auto')) {
+      formatted = formatted.replace('/upload/', '/upload/f_auto,q_auto/');
+    }
+    formatted = formatted.replace(/\.(heic|heif)$/i, '.jpg');
+  } else if (/\.(heic|heif)$/i.test(formatted)) {
+    formatted = formatted.replace(/\.(heic|heif)$/i, '.jpg');
+  }
+  return formatted;
+};
+
 export const CustomerArchives: React.FC = () => {
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchFeedbacks = async () => {
@@ -42,7 +59,26 @@ export const CustomerArchives: React.FC = () => {
     fetchFeedbacks();
   }, []);
 
-  // Multiplied items list to guarantee a seamless continuous infinite marquee loop if feedbacks exist
+  // Smooth Auto-Scrolling JS ticker loop
+  useEffect(() => {
+    if (isPaused || feedbacks.length === 0) return;
+
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const interval = setInterval(() => {
+      if (!container) return;
+      if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 2) {
+        container.scrollLeft = 0;
+      } else {
+        container.scrollLeft += 1;
+      }
+    }, 20);
+
+    return () => clearInterval(interval);
+  }, [isPaused, feedbacks]);
+
+  // Duplicated items list to support smooth continuous scrolling loop
   const displayItems = feedbacks.length > 0
     ? (feedbacks.length < 5 
         ? [...feedbacks, ...feedbacks, ...feedbacks, ...feedbacks, ...feedbacks, ...feedbacks]
@@ -70,7 +106,7 @@ export const CustomerArchives: React.FC = () => {
         </div>
       </div>
 
-      {/* Content Rendering: Marquee vs Brutalist Empty State */}
+      {/* Content Rendering: Scrollable Marquee vs Brutalist Empty State */}
       {loading ? (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center border border-dashed border-zinc-850 bg-black py-20">
@@ -88,47 +124,63 @@ export const CustomerArchives: React.FC = () => {
           </div>
         </div>
       ) : (
-        /* Infinite Horizontal Marquee Carousel */
+        /* Touch/Swipeable & Auto-scrolling Track Container */
         <div className="relative w-full overflow-hidden">
           {/* Left & Right subtle edge fade gradient */}
           <div className="absolute top-0 bottom-0 left-0 w-16 sm:w-32 bg-gradient-to-r from-black to-transparent z-20 pointer-events-none" />
           <div className="absolute top-0 bottom-0 right-0 w-16 sm:w-32 bg-gradient-to-l from-black to-transparent z-20 pointer-events-none" />
 
-          {/* Marquee Track */}
-          <div className="animate-marquee flex gap-6 py-2">
-            {displayItems.map((item, index) => (
-              <div
-                key={`${item.id}-${index}`}
-                className="aspect-[9/16] w-[260px] sm:w-[300px] md:w-[340px] flex-shrink-0 relative group rounded-none border border-zinc-850 overflow-hidden bg-zinc-950 transition-all duration-300 hover:border-white"
-              >
-                {/* Image with grayscale hover effect */}
-                {item.image_url ? (
-                  <img
-                    src={item.image_url}
-                    alt={`Feedback ${item.id}`}
-                    className="object-cover w-full h-full grayscale group-hover:grayscale-0 transition-all duration-700 scale-100 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-zinc-900 flex items-center justify-center font-mono text-zinc-700 text-xs uppercase">
-                    NO IMAGE
-                  </div>
-                )}
+          {/* Swipeable + Auto-scrolling Track */}
+          <div
+            ref={scrollContainerRef}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            onTouchStart={() => setIsPaused(true)}
+            onTouchEnd={() => setIsPaused(false)}
+            onMouseDown={() => setIsPaused(true)}
+            onMouseUp={() => setIsPaused(false)}
+            className="flex gap-6 py-2 px-4 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory cursor-grab active:cursor-grabbing"
+          >
+            {displayItems.map((item, index) => {
+              const hasText = item.content && item.content.trim() !== '';
+              const imageUrl = getOptimizedImageUrl(item.image_url);
 
-                {/* Darkening desaturation overlay */}
-                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/10 transition-colors duration-300 pointer-events-none" />
+              return (
+                <div
+                  key={`${item.id}-${index}`}
+                  className="aspect-[9/16] w-[260px] sm:w-[300px] md:w-[340px] flex-shrink-0 relative group rounded-none border border-zinc-850 overflow-hidden bg-zinc-950 transition-all duration-300 hover:border-white snap-start"
+                >
+                  {/* Image in FULL COLOR at all times (NO grayscale) */}
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt={`Feedback ${item.id}`}
+                      className="object-cover w-full h-full scale-100 group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-zinc-900 flex items-center justify-center font-mono text-zinc-700 text-xs uppercase">
+                      NO IMAGE
+                    </div>
+                  )}
 
-                {/* Text Overlay at bottom */}
-                <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black via-black/85 to-transparent flex flex-col justify-end space-y-2 z-10">
-                  <span className="font-mono text-[9px] text-zinc-450 tracking-[0.25em] uppercase font-bold">
-                    ARCHIVE #{String(item.id).padStart(4, '0')}
-                  </span>
-                  <p className="font-mono text-xs text-white uppercase tracking-wider line-clamp-3 leading-relaxed font-normal">
-                    "{item.content}"
-                  </p>
+                  {/* Darkening overlay */}
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/5 transition-colors duration-300 pointer-events-none" />
+
+                  {/* Text Overlay at bottom - ONLY IF CONTENT EXISTS */}
+                  {hasText && (
+                    <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black via-black/85 to-transparent flex flex-col justify-end space-y-2 z-10">
+                      <span className="font-mono text-[9px] text-zinc-450 tracking-[0.25em] uppercase font-bold">
+                        ARCHIVE #{String(item.id).padStart(4, '0')}
+                      </span>
+                      <p className="font-mono text-xs text-white uppercase tracking-wider line-clamp-3 leading-relaxed font-normal">
+                        "{item.content}"
+                      </p>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

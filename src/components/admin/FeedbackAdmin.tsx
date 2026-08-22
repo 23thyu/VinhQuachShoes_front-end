@@ -7,7 +7,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { getAdminHeaders, getAdminAuthOnlyHeaders } from '../../utils/authHeaders';
 import { MessageSquare, Upload, Trash2, Loader2, Image as ImageIcon, Plus, FolderOpen } from 'lucide-react';
-import { CloudinaryImagePicker } from './CloudinaryImagePicker';
+import { CloudinaryImagePicker, getOptimizedImageUrl } from './CloudinaryImagePicker';
 
 export interface FeedbackItem {
   id: string | number;
@@ -76,8 +76,9 @@ export const FeedbackAdmin: React.FC = () => {
 
   // Select image from Cloudinary Library Picker
   const handleSelectFromCloudinary = (url: string) => {
-    setImageUrl(url);
-    setImagePreview(url);
+    const optimized = getOptimizedImageUrl(url);
+    setImageUrl(optimized);
+    setImagePreview(optimized);
     setImageFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -97,10 +98,6 @@ export const FeedbackAdmin: React.FC = () => {
   // Submit form to create feedback
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim()) {
-      toast.warning('VUI LÒNG NHẬP NỘI DUNG FEEDBACK');
-      return;
-    }
     if (!imageFile && !imageUrl) {
       toast.warning('VUI LÒNG CHỌN HÌNH ẢNH FEEDBACK');
       return;
@@ -109,7 +106,7 @@ export const FeedbackAdmin: React.FC = () => {
     setSubmitting(true);
     try {
       const formData = new FormData();
-      formData.append('content', content);
+      formData.append('content', content ? content.trim() : '');
       
       if (imageFile) {
         formData.append('images', imageFile);
@@ -212,7 +209,7 @@ export const FeedbackAdmin: React.FC = () => {
               />
 
               {imagePreview ? (
-                <div className="relative aspect-[9/16] w-full max-w-[200px] border border-zinc-800 bg-black overflow-hidden group">
+                <div className="relative aspect-[9/16] w-full max-w-[200px] border border-zinc-800 bg-black overflow-hidden group rounded-none">
                   <img
                     src={imagePreview}
                     alt="Preview"
@@ -254,18 +251,17 @@ export const FeedbackAdmin: React.FC = () => {
               )}
             </div>
 
-            {/* Review Content Textarea */}
+            {/* Review Content Textarea (OPTIONAL) */}
             <div className="space-y-2 flex flex-col justify-between">
               <div className="space-y-2">
                 <label className="block font-mono text-[9px] uppercase tracking-wider text-zinc-400">
-                  NỘI DUNG ĐÁNH GIÁ (FEEDBACK CONTENT)
+                  NỘI DUNG ĐÁNH GIÁ (TUỲ CHỌN / OPTIONAL)
                 </label>
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="NHẬP NỘI DUNG ĐÁNH GIÁ CỦA KHÁCH HÀNG..."
+                  placeholder="NHẬP NỘI DUNG ĐÁNH GIÁ (CÓ THỂ ĐỂ TRỐNG NẾU CHỈ MỎ NGUYÊN ẢNH)..."
                   className="bg-black border border-zinc-800 text-white font-mono text-sm p-4 w-full rounded-none focus:border-white focus:outline-none placeholder-zinc-650 resize-none h-48 uppercase"
-                  required
                 />
               </div>
 
@@ -310,48 +306,55 @@ export const FeedbackAdmin: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {feedbacks.map((item) => (
-              <div
-                key={item.id}
-                className="aspect-[9/16] relative border border-zinc-800 bg-zinc-950 overflow-hidden group rounded-none"
-              >
-                {/* Background Image */}
-                {item.image_url ? (
-                  <img
-                    src={item.image_url}
-                    alt={`Feedback ${item.id}`}
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-zinc-900 flex items-center justify-center font-mono text-zinc-700 text-xs uppercase">
-                    NO IMAGE
-                  </div>
-                )}
+            {feedbacks.map((item) => {
+              const displayUrl = getOptimizedImageUrl(item.image_url);
+              const hasText = item.content && item.content.trim() !== '';
 
-                {/* Dark Overlay */}
-                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/10 transition-colors pointer-events-none" />
-
-                {/* Aggressive Delete Button over Image */}
-                <button
-                  type="button"
-                  onClick={() => handleDelete(item.id)}
-                  className="absolute top-2 right-2 bg-red-600 text-white font-mono text-[10px] px-2 py-1 uppercase tracking-widest cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity z-20 hover:bg-red-700 rounded-none border border-red-500"
-                  title="Xóa Feedback này"
+              return (
+                <div
+                  key={item.id}
+                  className="aspect-[9/16] relative border border-zinc-800 bg-zinc-950 overflow-hidden group rounded-none"
                 >
-                  XÓA
-                </button>
+                  {/* Background Image - FULL COLOR */}
+                  {displayUrl ? (
+                    <img
+                      src={displayUrl}
+                      alt={`Feedback ${item.id}`}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-zinc-900 flex items-center justify-center font-mono text-zinc-700 text-xs uppercase">
+                      NO IMAGE
+                    </div>
+                  )}
 
-                {/* Text Overlay at bottom */}
-                <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black via-black/85 to-transparent flex flex-col justify-end z-10">
-                  <span className="font-mono text-[9px] text-zinc-450 tracking-widest uppercase font-bold mb-1">
-                    ID #{item.id}
-                  </span>
-                  <p className="font-mono text-[10px] text-white uppercase tracking-wider line-clamp-3 leading-relaxed font-normal">
-                    "{item.content}"
-                  </p>
+                  {/* Dark Overlay */}
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/5 transition-colors pointer-events-none" />
+
+                  {/* Aggressive Delete Button over Image */}
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(item.id)}
+                    className="absolute top-2 right-2 bg-red-600 text-white font-mono text-[10px] px-2 py-1 uppercase tracking-widest cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity z-20 hover:bg-red-700 rounded-none border border-red-500"
+                    title="Xóa Feedback này"
+                  >
+                    XÓA
+                  </button>
+
+                  {/* Text Overlay at bottom - ONLY IF TEXT EXISTS */}
+                  {hasText && (
+                    <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black via-black/85 to-transparent flex flex-col justify-end z-10">
+                      <span className="font-mono text-[9px] text-zinc-450 tracking-widest uppercase font-bold mb-1">
+                        ID #{item.id}
+                      </span>
+                      <p className="font-mono text-[10px] text-white uppercase tracking-wider line-clamp-3 leading-relaxed font-normal">
+                        "{item.content}"
+                      </p>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
