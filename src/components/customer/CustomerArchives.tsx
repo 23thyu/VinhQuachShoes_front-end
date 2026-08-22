@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export interface FeedbackItem {
   id: string | number;
@@ -34,6 +35,7 @@ export const CustomerArchives: React.FC = () => {
   const [isPaused, setIsPaused] = useState<boolean>(false);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const pauseTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const fetchFeedbacks = async () => {
@@ -78,6 +80,30 @@ export const CustomerArchives: React.FC = () => {
     return () => clearInterval(interval);
   }, [isPaused, feedbacks]);
 
+  // Helper to temporarily pause auto-scroll during manual interaction
+  const triggerTempPause = () => {
+    setIsPaused(true);
+    if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+    pauseTimerRef.current = setTimeout(() => {
+      setIsPaused(false);
+    }, 4000);
+  };
+
+  // Manual button scroll left/right
+  const handleScrollLeft = () => {
+    triggerTempPause();
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+    }
+  };
+
+  const handleScrollRight = () => {
+    triggerTempPause();
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+    }
+  };
+
   // Duplicated items list to support smooth continuous scrolling loop
   const displayItems = feedbacks.length > 0
     ? (feedbacks.length < 5 
@@ -99,9 +125,36 @@ export const CustomerArchives: React.FC = () => {
               CUSTOMER ARCHIVES
             </h2>
           </div>
-          <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 flex items-center gap-2">
-            <span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-pulse" />
-            <span>LIVE FEEDBACK STREAM</span>
+
+          <div className="flex items-center gap-4">
+            <div className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 hidden sm:flex items-center gap-2">
+              <span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-pulse" />
+              <span>LIVE FEEDBACK STREAM</span>
+            </div>
+
+            {/* Brutalist Touch & Click Navigation Controls */}
+            {feedbacks.length > 0 && (
+              <div className="flex items-center border border-zinc-800 bg-black divide-x divide-zinc-800">
+                <button
+                  type="button"
+                  onClick={handleScrollLeft}
+                  className="p-2.5 sm:px-3 sm:py-2 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors font-mono text-xs cursor-pointer flex items-center gap-1 uppercase tracking-widest rounded-none"
+                  title="KÉO SANG TRÁI"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  <span className="hidden sm:inline text-[10px]">TRÁI</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleScrollRight}
+                  className="p-2.5 sm:px-3 sm:py-2 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors font-mono text-xs cursor-pointer flex items-center gap-1 uppercase tracking-widest rounded-none"
+                  title="KÉO SANG PHẢI"
+                >
+                  <span className="hidden sm:inline text-[10px]">PHẢI</span>
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -125,10 +178,28 @@ export const CustomerArchives: React.FC = () => {
         </div>
       ) : (
         /* Touch/Swipeable & Auto-scrolling Track Container */
-        <div className="relative w-full overflow-hidden">
+        <div className="relative w-full group/track overflow-hidden">
           {/* Left & Right subtle edge fade gradient */}
-          <div className="absolute top-0 bottom-0 left-0 w-16 sm:w-32 bg-gradient-to-r from-black to-transparent z-20 pointer-events-none" />
-          <div className="absolute top-0 bottom-0 right-0 w-16 sm:w-32 bg-gradient-to-l from-black to-transparent z-20 pointer-events-none" />
+          <div className="absolute top-0 bottom-0 left-0 w-12 sm:w-24 bg-gradient-to-r from-black to-transparent z-20 pointer-events-none" />
+          <div className="absolute top-0 bottom-0 right-0 w-12 sm:w-24 bg-gradient-to-l from-black to-transparent z-20 pointer-events-none" />
+
+          {/* Quick Floating Side Nav Buttons (Visible on hover on desktop) */}
+          <button
+            type="button"
+            onClick={handleScrollLeft}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-black/90 text-white p-3 border border-zinc-800 hover:border-white opacity-0 group-hover/track:opacity-100 transition-all rounded-none cursor-pointer hidden md:flex items-center justify-center"
+            title="KÉO SANG TRÁI"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={handleScrollRight}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-black/90 text-white p-3 border border-zinc-800 hover:border-white opacity-0 group-hover/track:opacity-100 transition-all rounded-none cursor-pointer hidden md:flex items-center justify-center"
+            title="KÉO SANG PHẢI"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
 
           {/* Swipeable + Auto-scrolling Track */}
           <div
@@ -139,7 +210,7 @@ export const CustomerArchives: React.FC = () => {
             onTouchEnd={() => setIsPaused(false)}
             onMouseDown={() => setIsPaused(true)}
             onMouseUp={() => setIsPaused(false)}
-            className="flex gap-6 py-2 px-4 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory cursor-grab active:cursor-grabbing"
+            className="flex gap-6 py-2 px-4 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory cursor-grab active:cursor-grabbing scroll-smooth"
           >
             {displayItems.map((item, index) => {
               const hasText = item.content && item.content.trim() !== '';
@@ -148,14 +219,14 @@ export const CustomerArchives: React.FC = () => {
               return (
                 <div
                   key={`${item.id}-${index}`}
-                  className="aspect-[9/16] w-[260px] sm:w-[300px] md:w-[340px] flex-shrink-0 relative group rounded-none border border-zinc-850 overflow-hidden bg-zinc-950 transition-all duration-300 hover:border-white snap-start"
+                  className="aspect-[9/16] w-[260px] sm:w-[300px] md:w-[340px] flex-shrink-0 relative group/card rounded-none border border-zinc-850 overflow-hidden bg-zinc-950 transition-all duration-300 hover:border-white snap-start"
                 >
                   {/* Image in FULL COLOR at all times (NO grayscale) */}
                   {imageUrl ? (
                     <img
                       src={imageUrl}
                       alt={`Feedback ${item.id}`}
-                      className="object-cover w-full h-full scale-100 group-hover:scale-105 transition-transform duration-500"
+                      className="object-cover w-full h-full scale-100 group-hover/card:scale-105 transition-transform duration-500"
                       loading="lazy"
                     />
                   ) : (
@@ -165,7 +236,7 @@ export const CustomerArchives: React.FC = () => {
                   )}
 
                   {/* Darkening overlay */}
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/5 transition-colors duration-300 pointer-events-none" />
+                  <div className="absolute inset-0 bg-black/20 group-hover/card:bg-black/5 transition-colors duration-300 pointer-events-none" />
 
                   {/* Text Overlay at bottom - ONLY IF CONTENT EXISTS */}
                   {hasText && (
