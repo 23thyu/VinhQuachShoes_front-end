@@ -61,23 +61,29 @@ export const CustomerArchives: React.FC = () => {
     fetchFeedbacks();
   }, []);
 
-  // Smooth Auto-Scrolling JS ticker loop
+  // 60FPS Ultra-Smooth Auto-Scrolling Engine using requestAnimationFrame
   useEffect(() => {
     if (isPaused || feedbacks.length === 0) return;
 
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const interval = setInterval(() => {
-      if (!container) return;
-      if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 2) {
-        container.scrollLeft = 0;
-      } else {
-        container.scrollLeft += 1;
-      }
-    }, 20);
+    let animId: number;
 
-    return () => clearInterval(interval);
+    const step = () => {
+      if (container) {
+        if (container.scrollLeft >= container.scrollWidth - container.clientWidth - 1) {
+          container.scrollLeft = 0;
+        } else {
+          container.scrollLeft += 1.2;
+        }
+      }
+      animId = requestAnimationFrame(step);
+    };
+
+    animId = requestAnimationFrame(step);
+
+    return () => cancelAnimationFrame(animId);
   }, [isPaused, feedbacks]);
 
   // Helper to temporarily pause auto-scroll during manual interaction
@@ -93,14 +99,14 @@ export const CustomerArchives: React.FC = () => {
   const handleScrollLeft = () => {
     triggerTempPause();
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+      scrollContainerRef.current.scrollBy({ left: -340, behavior: 'smooth' });
     }
   };
 
   const handleScrollRight = () => {
     triggerTempPause();
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+      scrollContainerRef.current.scrollBy({ left: 340, behavior: 'smooth' });
     }
   };
 
@@ -201,7 +207,7 @@ export const CustomerArchives: React.FC = () => {
             <ChevronRight className="h-5 w-5" />
           </button>
 
-          {/* Swipeable + Auto-scrolling Track */}
+          {/* Swipeable + Auto-scrolling Track (60FPS requestAnimationFrame ticker) */}
           <div
             ref={scrollContainerRef}
             onMouseEnter={() => setIsPaused(true)}
@@ -210,7 +216,7 @@ export const CustomerArchives: React.FC = () => {
             onTouchEnd={() => setIsPaused(false)}
             onMouseDown={() => setIsPaused(true)}
             onMouseUp={() => setIsPaused(false)}
-            className="flex gap-6 py-2 px-4 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory cursor-grab active:cursor-grabbing scroll-smooth"
+            className="flex gap-6 py-2 px-4 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden cursor-grab active:cursor-grabbing"
           >
             {displayItems.map((item, index) => {
               const hasText = item.content && item.content.trim() !== '';
@@ -219,7 +225,7 @@ export const CustomerArchives: React.FC = () => {
               return (
                 <div
                   key={`${item.id}-${index}`}
-                  className="aspect-[9/16] w-[260px] sm:w-[300px] md:w-[340px] flex-shrink-0 relative group/card rounded-none border border-zinc-850 overflow-hidden bg-zinc-950 transition-all duration-300 hover:border-white snap-start"
+                  className="aspect-[9/16] w-[260px] sm:w-[300px] md:w-[340px] flex-shrink-0 relative group/card rounded-none border border-zinc-850 overflow-hidden bg-zinc-950 transition-all duration-300 hover:border-white"
                 >
                   {/* Image in FULL COLOR at all times (NO grayscale) */}
                   {imageUrl ? (
